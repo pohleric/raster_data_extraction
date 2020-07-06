@@ -9,3 +9,4 @@ extract_APHRO_V1808.py
 extract_HAR30.py
 extract_APHRO_V1901.py
 extract_HAR30_daily.py
+.DS_Store
