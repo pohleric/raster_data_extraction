@@ -2,8 +2,8 @@
 Collection of wrapper functions to extract data from various gridded data products, including:
 
 - High Asia Refined (HAR)
--- V1.4
--- V2.0
+  - V1.4
+  - V2.0
 
--APHRODITE
+- APHRODITE
 -- V1101
