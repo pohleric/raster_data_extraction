@@ -1,7 +1,7 @@
 
 #---------------------------------------------- FUNCTIONS ----------------------------------------------
 prep <- function(fname,adj_fac=1, offset = 0){
-  fname <- '/Users/pohle/PycharmProjects/data-download/marlene/output_GPM-3IMERG_mon/precipitation_1.txt'
+  # fname <- '/Users/pohle/PycharmProjects/data-download/marlene/output_GPM-3IMERG_mon/precipitation_1.txt'
   lmfun <- function(t,x){
     LM <- lm(x~t)
     anoms <- LM$residuals
@@ -36,7 +36,8 @@ prep <- function(fname,adj_fac=1, offset = 0){
   names_c_cs_dt <- paste0(names_c_cs,'_dt')
   a[names_c_cs] <- tmp_cs
   a[names_c_cs_dt] <- NA
-  a[ind_val,names_c_cs_dt] <- tmp_cs_dt
+  ind_val_multi = (rowMeans(ind_val)==1)
+  a[ind_val_multi,names_c_cs_dt] <- tmp_cs_dt
   
   # a[as.logical(ind_0),names_c_cs] <- NA
   # a[as.logical(ind_0),names_c_cs_dt] <- NA
@@ -103,14 +104,14 @@ fname <- '/Users/pohle/PycharmProjects/data-download/marlene/output_GPM-3IMERG_m
 d <- prep(fname)
 zoo_plot(d, what='ts')
 zoo_plot(d, what = 'cs')
-zoo_plot(d, what = 'cs_dt')
+zoo_plot(d, what = 'cs_dt', average=T)
 
 
 # fname <- '/Users/pohle/PycharmProjects/data-download/marlene/output_GPCC/precip_1.txt'
 # d <- prep(fname)
 # zoo_plot(d, what='ts')
 # zoo_plot(d, what = 'cs')
-# zoo_plot(d, what = 'cs_dt')
+# zoo_plot(d, what = 'cs_dt',average = T)
 
 
 # fname <- '/Users/pohle/PycharmProjects/data-download/marlene/output_APHR_V1101/precip_1.txt'

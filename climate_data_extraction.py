@@ -13,7 +13,7 @@ import pandas as pd
 from netCDF4 import num2date
 import datetime
 from pyproj import Proj, transform
-from pyproj import Transformer
+# from pyproj import Transformer
 
 # there are several input raster datasets in slightly different format
 # define read_function for each of them
@@ -83,6 +83,9 @@ class met():
         # the extracted values
         self.era5_time_series_extracted = None
 
+        # Anomalies
+        self.anomalies = None
+
         # shapefile
         self.shapefile_driver = ogr.GetDriverByName('ESRI Shapefile')
         self.shapefile = None
@@ -137,10 +140,12 @@ class met():
         return mem_raster.ReadAsArray()
 
     def read_ERA5(self):
-        varstr = "_" + self.era5_variable + "_"
+        varstr = self.era5_variable
         m_onlyfiles = [f for f in os.listdir(self.era5_dir) if os.path.isfile(os.path.join(self.era5_dir, f))]
         m_split = [fnmatch.fnmatch(tmp_file, '*.nc') for tmp_file in m_onlyfiles]
         m_files = [m_onlyfiles[ii] for ii in np.arange(len(m_onlyfiles)) if m_split[ii]]
+        m_files = [filename for filename in m_files if not filename.startswith(".")]
+        print(m_files)
         m_file = [m_files_tmp for m_files_tmp in m_files if varstr in m_files_tmp][0]
         print("Reading %s"%m_file)
         self.era5_fname = self.era5_dir + m_file
@@ -242,8 +247,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2+1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2+1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2+1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2+1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -332,8 +337,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2+1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2+1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2+1] # + (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2+1]  # + (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -430,8 +435,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -574,8 +579,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1]  #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -736,8 +741,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -951,15 +956,15 @@ class met():
 
         # subset to significantly reduce processing time
         # self.era5_subset = [70., 73., 37., 41]
-        # if subset:
-        #     if not self.era5_subset:
-        #         print('Please define a subset "metObject.era5_subset = [lonmin, lonmax, latmin, latmax]"')
-        #         return
-        #     else:
-        #         lon_min = self.era5_subset[0]
-        #         lon_max = self.era5_subset[1]
-        #         lat_min = self.era5_subset[2]
-        #         lat_max = self.era5_subset[3]
+        if subset:
+            if not self.era5_subset:
+                print('Please define a subset "metObject.era5_subset = [lonmin, lonmax, latmin, latmax]"')
+                return
+            else:
+                lon_min = self.era5_subset[0]
+                lon_max = self.era5_subset[1]
+                lat_min = self.era5_subset[2]
+                lat_max = self.era5_subset[3]
 
         rs_stack_i = 0
         self.era5_geotransform = None
@@ -1002,7 +1007,7 @@ class met():
                     self.era5_res_y) * self.era5_geotransform[5]
 
                 # lonlat grid
-                self.llcgrid = np.meshgrid(self.era5_lons_center, self.era5_lats_center, sparse=False)
+                self.llcgrid = np.meshgrid(self.era5_lons, self.era5_lats, sparse=False)
 
                 # subset - adjust and overwrite the previous statements
                 if subset:
@@ -1012,8 +1017,8 @@ class met():
                     lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                     # overwrite lons_center and lats_center
-                    self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                    self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                    self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                    self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                     # overwrite resx/resy
                     self.era5_res_x = len(self.era5_lons_center)
@@ -1128,8 +1133,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -1233,8 +1238,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -1345,8 +1350,8 @@ class met():
                 lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
 
                 # overwrite lons_center and lats_center
-                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] + (0.5 * self.era5_geotransform[1])
-                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] + (0.5 * self.era5_geotransform[5])
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
 
                 # overwrite resx/resy
                 self.era5_res_x = len(self.era5_lons_center)
@@ -1406,6 +1411,330 @@ class met():
         self.lat_grid = np.array(self.llgrid[1])
 
         print('Read in GPM data.')
+
+    def read_MOD10CM(self):
+        print('Reading MOD10CM...')
+
+        # files
+        # varstr = self.era5_variable + "_"
+        m_onlyfiles = [f for f in os.listdir(self.era5_dir) if os.path.isfile(os.path.join(self.era5_dir, f))]
+        m_split = [fnmatch.fnmatch(tmp_file, '*.hdf') for tmp_file in m_onlyfiles]
+        m_files = [m_onlyfiles[ii] for ii in np.arange(len(m_onlyfiles)) if m_split[ii]]
+        # m_files = [m_files_tmp for m_files_tmp in m_files if varstr in m_files_tmp]
+        # make sure not to read in temp-files
+        # m_files = [filename for filename in m_files if filename.startswith(varstr)]
+        # make sure not to read hidden files
+        m_files = [filename for filename in m_files if not filename.startswith(".")]
+        m_files.sort()
+
+        self.era5_layers = len(m_files)
+
+        # get date from filenames
+
+        m_str = [m_files[ii].split('.')[1].split("A")[1] for ii in np.arange(len(m_files))]
+        self.era5_time = [datetime.datetime.strptime(all_dates_i, '%Y%j') for all_dates_i in m_str]
+
+        # subset to significantly reduce processing time
+        # self.era5_subset = [71.47, 71.63, 39.5, 39.7]
+        if not self.era5_subset:
+            print('Please define a subset "metObject.era5_subset = [lonmin, lonmax, latmin, latmax]"')
+            return
+        else:
+            lon_min = self.era5_subset[0]
+            lon_max = self.era5_subset[1]
+            lat_min = self.era5_subset[2]
+            lat_max = self.era5_subset[3]
+
+        slice_i = 0
+        self.era5_geotransform = None
+        # self.era5_time = []
+        # times_all = []
+        for m_file in m_files:
+            print("Reading %s" % m_file)
+            # m_file = m_files[0]
+            self.era5_fname = self.era5_dir + m_file
+
+            # with GDAL
+            self.era5_ds = gdal.Open(
+                'HDF4_EOS:EOS_GRID:"{0}":MOD_CMG_Snow_5km:Snow_Cover_Monthly_CMG'.format(self.era5_fname))
+
+            # if the metaparameters and geospatial data are not assigned yet read it, otherwise skip this redundant step
+            if not self.era5_geotransform:
+                self.era5_geotransform = list(self.era5_ds.GetGeoTransform())
+
+                self.era5_res_x0 = self.era5_ds.RasterXSize
+                self.era5_res_y0 = self.era5_ds.RasterYSize
+
+                # pixel center coordinates
+                self.era5_lons_center = self.era5_geotransform[0] + (0.5 * self.era5_geotransform[1]) + np.arange(
+                    self.era5_res_x0) * self.era5_geotransform[1]
+                self.era5_lats_center = self.era5_geotransform[3] + (0.5 * self.era5_geotransform[5]) + np.arange(
+                    self.era5_res_y0) * self.era5_geotransform[5]
+
+                lon_x1 = np.argmin(np.abs(self.era5_lons_center - lon_min))
+                lon_x2 = np.argmin(np.abs(self.era5_lons_center - lon_max))
+                lat_y1 = np.argmin(np.abs(self.era5_lats_center - lat_max))
+                lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
+
+                # overwrite lons_center and lats_center
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
+
+                # overwrite resx/resy
+                self.era5_res_x = len(self.era5_lons_center)
+                self.era5_res_y = len(self.era5_lats_center)
+
+                # overwrite era5_geotransform
+                self.era5_geotransform[0] = self.era5_lons_center[0] - (0.5 * self.era5_geotransform[1])
+                self.era5_geotransform[3] = self.era5_lats_center[0] - (0.5 * self.era5_geotransform[5])
+
+                # pixel outer coords
+                self.era5_lons = self.era5_geotransform[0] + np.arange(self.era5_res_x + 1) * self.era5_geotransform[1]
+                self.era5_lats = self.era5_geotransform[3] + np.arange(self.era5_res_y + 1) * self.era5_geotransform[5]
+
+                self.llgrid = np.meshgrid(self.era5_lons, self.era5_lats, sparse=False)
+                self.lon_grid = np.array(self.llgrid[0])
+                self.lat_grid = np.array(self.llgrid[1])
+
+                self.era5_data = np.zeros((self.era5_res_y, self.era5_res_x, self.era5_layers))
+
+            self.era5_data[:, :, slice_i] = self.era5_ds.GetRasterBand(1).ReadAsArray(xoff=int(lon_x1),
+                                                                                      yoff=int(lat_y1),
+                                                                                      win_xsize=self.era5_res_x,
+                                                                                      win_ysize=self.era5_res_y)
+
+            slice_i += 1
+
+            # time_string = self.era5_ds.GetMetadata_Dict()['NETCDF_DIM_time_VALUES'][1:-1]
+            # tmp_time = list(ast.literal_eval(time_string))
+            # tmp_time_date = num2date(tmp_time, time_units, time_calendar)
+            # replace day with 1
+            # tmp_time_date = [tmp_time_date_i.replace(day=1) for tmp_time_date_i in tmp_time_date]
+            # times_all.append(tmp_time_date)
+
+            # self.era5_time = [tst for tstl in times_all for tst in tstl]
+
+        nan_exceed_thresh = np.logical_or(self.era5_data < self.era5_nan_negative,
+                                          self.era5_data > self.era5_nan_positive)
+        self.era5_data[nan_exceed_thresh] = np.nan
+
+        # # fix the coordinates
+        # # self.era5_geotransform
+        # if self.era5_geotransform[0] < 0:
+        #     self.era5_geotransform[0] = self.era5_geotransform[0] + 360
+        #
+        # self.era5_lons_center = self.era5_geotransform[0] + (0.5 * self.era5_geotransform[1]) + np.arange(
+        #     self.era5_res_x) * self.era5_geotransform[1]
+        # self.era5_lats_center = self.era5_geotransform[3] + (0.5 * self.era5_geotransform[5]) + np.arange(
+        #     self.era5_res_y) * self.era5_geotransform[5]
+        #
+        # # pixel outer coords
+        # self.era5_lons = self.era5_geotransform[0] + np.arange(self.era5_res_x + 1) * self.era5_geotransform[1]
+        # self.era5_lats = self.era5_geotransform[3] + np.arange(self.era5_res_y + 1) * self.era5_geotransform[5]
+        #
+        # self.llgrid = np.meshgrid(self.era5_lons, self.era5_lats, sparse=False)
+        # self.lon_grid = np.array(self.llgrid[0])
+        # self.lat_grid = np.array(self.llgrid[1])
+
+        print('Read in MOD10CM data.')
+
+    def read_GRACE_RL06M(self):
+        print('Reading GRACE_RL06M...')
+
+        # files
+        # varstr = self.era5_variable + "_"
+        m_file = 'GRCTellus.JPL.200204_202005.GLO.RL06M.MSCNv02CRI.nc'
+
+        # subset to significantly reduce processing time
+        # self.era5_subset = [71.47, 71.63, 39.5, 39.7]
+        if not self.era5_subset:
+            print('Please define a subset "metObject.era5_subset = [lonmin, lonmax, latmin, latmax]"')
+            return
+        else:
+            lon_min = self.era5_subset[0]
+            lon_max = self.era5_subset[1]
+            lat_min = self.era5_subset[2]
+            lat_max = self.era5_subset[3]
+
+        self.era5_geotransform = None
+        # self.era5_time = []
+        # times_all = []
+
+        print("Reading %s" % m_file)
+        # m_file = m_files[0]
+        self.era5_fname = self.era5_dir + m_file
+
+        # with GDAL
+        self.era5_ds = gdal.Open('NETCDF:"' + self.era5_fname + '":%s' % self.era5_variable)
+
+        # if the metaparameters and geospatial data are not assigned yet read it, otherwise skip this redundant step
+        if not self.era5_geotransform:
+            self.era5_geotransform = list(self.era5_ds.GetGeoTransform())
+            time_calendar = self.era5_ds.GetMetadata_Dict()['time#calendar']
+            time_units = self.era5_ds.GetMetadata_Dict()['time#units']
+
+            self.era5_res_x0 = self.era5_ds.RasterXSize
+            self.era5_res_y0 = self.era5_ds.RasterYSize
+
+            # pixel center coordinates
+            self.era5_lons_center = self.era5_geotransform[0] + (0.5 * self.era5_geotransform[1]) + np.arange(
+                self.era5_res_x0) * self.era5_geotransform[1]
+            self.era5_lats_center = self.era5_geotransform[3] + (0.5 * self.era5_geotransform[5]) + np.arange(
+                self.era5_res_y0) * self.era5_geotransform[5]
+
+            lon_x1 = np.argmin(np.abs(self.era5_lons_center - lon_min))
+            lon_x2 = np.argmin(np.abs(self.era5_lons_center - lon_max))
+            lat_y1 = np.argmin(np.abs(self.era5_lats_center - lat_max))
+            lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
+
+            # overwrite lons_center and lats_center
+            self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1]  # + (0.5 * self.era5_geotransform[1])
+            self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1]  # + (0.5 * self.era5_geotransform[5])
+
+            # overwrite resx/resy
+            self.era5_res_x = len(self.era5_lons_center)
+            self.era5_res_y = len(self.era5_lats_center)
+
+            # overwrite era5_geotransform
+            self.era5_geotransform[0] = self.era5_lons_center[0] - (0.5 * self.era5_geotransform[1])
+            self.era5_geotransform[3] = self.era5_lats_center[0] - (0.5 * self.era5_geotransform[5])
+
+            # pixel outer coords
+            self.era5_lons = self.era5_geotransform[0] + np.arange(self.era5_res_x + 1) * self.era5_geotransform[1]
+            self.era5_lats = self.era5_geotransform[3] + np.arange(self.era5_res_y + 1) * self.era5_geotransform[5]
+
+            self.llgrid = np.meshgrid(self.era5_lons, self.era5_lats, sparse=False)
+            self.lon_grid = np.array(self.llgrid[0])
+            self.lat_grid = np.array(self.llgrid[1])
+
+            self.era5_layers = self.era5_ds.RasterCount
+            self.era5_data = np.zeros((self.era5_res_y, self.era5_res_x, self.era5_layers))
+
+        for slice_i in range(self.era5_layers):
+            self.era5_data[:, :, slice_i] = self.era5_ds.GetRasterBand(slice_i + 1).ReadAsArray(xoff=int(lon_x1),
+                                                                                                yoff=int(lat_y1),
+                                                                                                win_xsize=self.era5_res_x,
+                                                                                                win_ysize=self.era5_res_y)
+
+        time_string = self.era5_ds.GetMetadata_Dict()['NETCDF_DIM_time_VALUES'][1:-1]
+        tmp_time = list(ast.literal_eval(time_string))
+        self.era5_time = num2date(tmp_time, time_units, time_calendar)
+
+        nan_exceed_thresh = np.logical_or(self.era5_data < self.era5_nan_negative,
+                                          self.era5_data > self.era5_nan_positive)
+        self.era5_data[nan_exceed_thresh] = np.nan
+
+        print('Read in GRACE_RL06M data.')
+
+
+    def read_tomas_stack(self):
+        print('Reading Tomas datastack ...')
+        #
+        # varstr = "_" + self.era5_variable + "_"
+        m_onlyfiles = ['final_stack_2904_cld.nc']
+        m_split = [fnmatch.fnmatch(tmp_file, '*.nc') for tmp_file in m_onlyfiles]
+        m_files = [m_onlyfiles[ii] for ii in np.arange(len(m_onlyfiles)) if m_split[ii]]
+
+        self.era5_layers = None  # len(m_files) * 12
+
+        # subset to significantly reduce processing time
+        if not self.era5_subset:
+            print('Please define a subset "metObject.era5_subset = [lonmin, lonmax, latmin, latmax]"')
+            return
+        else:
+            lon_min = self.era5_subset[0]
+            lon_max = self.era5_subset[1]
+            lat_min = self.era5_subset[2]
+            lat_max = self.era5_subset[3]
+
+        slice_i = 0
+        self.era5_geotransform = None
+        self.era5_time = []
+        for m_file in m_files:
+
+            # m_file = "har_d30km_m_2d_prcp_2001_WGS84.nc"
+            print("Reading %s" % m_file)
+            self.era5_fname = self.era5_dir + m_file
+
+            # with GDAL
+            # self.era5_ds = gdal.Open(self.era5_fname)
+            self.era5_ds = gdal.Open('NETCDF:"' + self.era5_fname + '":%s' % self.era5_variable)
+            rasterband_n = self.era5_ds.RasterCount
+
+            # if the metaparameters and geospatial data are not assigned yet read it, otherwise skip this redundant step
+            if not self.era5_geotransform:
+                self.era5_geotransform = list(self.era5_ds.GetGeoTransform())
+                # # lats and lons
+                # f_year_st = int(m_files[0].split('_')[5])
+                # f_year_en = int(m_files[-1].split('_')[5])
+                # dates_length = pd.date_range(start=str(f_year_st) + '-01-01', end=str(f_year_en) + '-12-31')
+                # self.era5_layers = len(dates_length)
+                # self.era5_layers = len(m_files) * rasterband_n
+                time_string = self.era5_ds.GetMetadata_Dict()['NETCDF_DIM_time_VALUES'][1:-1]
+                time_calendar = self.era5_ds.GetMetadata_Dict()['time#calendar']
+                time_units = self.era5_ds.GetMetadata_Dict()['time#units']
+                era5_time = list(ast.literal_eval(time_string))
+                self.era5_time = num2date(era5_time, time_units, time_calendar)
+                self.era5_years = [x.year for x in self.era5_time]
+                self.era5_months = [x.month for x in self.era5_time]
+                self.era5_days = [x.day for x in self.era5_time]
+
+                self.era5_res_x = self.era5_ds.RasterXSize
+                self.era5_res_y = self.era5_ds.RasterYSize
+
+                # pixel center coordinates
+                self.era5_lons_center = self.era5_geotransform[0] + (0.5 * self.era5_geotransform[1]) + np.arange(
+                    self.era5_res_x) * self.era5_geotransform[1]
+                self.era5_lats_center = self.era5_geotransform[3] + (0.5 * self.era5_geotransform[5]) + np.arange(
+                    self.era5_res_y) * self.era5_geotransform[5]
+
+                # lonlat grid
+                self.llcgrid = np.meshgrid(self.era5_lons, self.era5_lats, sparse=False)
+
+                # subset - adjust and overwrite the previous statements
+
+                lon_x1 = np.argmin(np.abs(self.era5_lons_center - lon_min))
+                lon_x2 = np.argmin(np.abs(self.era5_lons_center - lon_max))
+                lat_y1 = np.argmin(np.abs(self.era5_lats_center - lat_max))
+                lat_y2 = np.argmin(np.abs(self.era5_lats_center - lat_min))
+
+                # overwrite lons_center and lats_center
+                self.era5_lons_center = self.era5_lons_center[lon_x1:lon_x2 + 1] #+ (0.5 * self.era5_geotransform[1])
+                self.era5_lats_center = self.era5_lats_center[lat_y1:lat_y2 + 1] #+ (0.5 * self.era5_geotransform[5])
+
+                # overwrite resx/resy
+                self.era5_res_x = len(self.era5_lons_center)
+                self.era5_res_y = len(self.era5_lats_center)
+
+                # overwrite era5_geotransform
+                self.era5_geotransform[0] = self.era5_lons_center[0] - (0.5 * self.era5_geotransform[1])
+                self.era5_geotransform[3] = self.era5_lats_center[0] - (0.5 * self.era5_geotransform[5])
+
+                # pixel outer coords
+                self.era5_lons = self.era5_geotransform[0] + np.arange(self.era5_res_x + 1) * self.era5_geotransform[1]
+                self.era5_lats = self.era5_geotransform[3] + np.arange(self.era5_res_y + 1) * self.era5_geotransform[5]
+
+                self.llgrid = np.meshgrid(self.era5_lons, self.era5_lats, sparse=False)
+                self.lon_grid = np.array(self.llgrid[0])
+                self.lat_grid = np.array(self.llgrid[1])
+
+                self.era5_data = np.zeros((self.era5_res_y, self.era5_res_x, rasterband_n))
+
+            for rb in range(rasterband_n):
+                self.era5_data[:, :, slice_i] = self.era5_ds.GetRasterBand(rb + 1).ReadAsArray(xoff=int(lon_x1),
+                                                                                               yoff=int(lat_y1),
+                                                                                               # upside down
+                                                                                               win_xsize=self.era5_res_x,
+                                                                                               win_ysize=self.era5_res_y)
+
+                slice_i += 1
+
+        # set manually the threshold for no data values
+        nan_exceed_thresh = np.logical_or(self.era5_data < self.era5_nan_negative,
+                                          self.era5_data > self.era5_nan_positive)
+        self.era5_data[nan_exceed_thresh] = np.nan
+
+        print('Read in Tomas data stack.')
 
     def read_shape(self):
         ''''
@@ -1591,20 +1920,106 @@ class met():
         df_out.to_csv(outfile)
         print('Output file %s written.' % outfile)
 
-# --- GPM 3IMERGM.06 --- #
-melf = met()
-melf.era5_dir = '/Volumes/DATA/GPM/GPM_3IMERGM.06/'
-melf.output_dir = '/Users/pohle/PycharmProjects/data-download/marlene/output_GPM-3IMERG_mon/'
-melf.era5_variable = 'precipitation'
-melf.mstation_fname = "/Volumes/EX1/data/glacier/marlene/abramov_poly.shp"
-melf.era5_subset = [69, 73, 38, 41]
 
-melf.read_GPM()
-melf.shapefile_ATTR_FIELD = 'OBJECTID'
-melf.read_shape()
-melf.extract_values()
-melf.save_data()
-melf.save_grid()
+    def calc_anomalies_grid(self, ts_aggregation='monthly', plot=False):
+        '''
+        :param ts_aggregation: specify if monthly or annual anomalies shall be calculated
+        :return: ts in the format rows(=time) / columns (pixels)
+        '''
+        # import pandas as pd
+        # ts_aggregation = 'monthly'
+
+        # use reshape to get each pixel ts as a single column
+        reshape_ts = (self.era5_data.shape[0] * self.era5_data.shape[1], -1)
+        reshape_ll = (self.era5_data.shape[0] * self.era5_data.shape[1])
+
+        llgrid_center = np.meshgrid(self.era5_lons_center, self.era5_lats_center, sparse=False)
+        lon_grid = np.array(llgrid_center[0])
+        lat_grid = np.array(llgrid_center[1])
+
+        data = self.era5_data.reshape(reshape_ts).T
+        lons_all = lon_grid.reshape(reshape_ll)
+        lats_all = lat_grid.reshape(reshape_ll)
+
+        head = np.array([str(a) + ';' + str(b) for a, b in zip(lons_all, lats_all)])
+        df_ = pd.DataFrame(data, columns=head, index=self.era5_time)
+
+        dict_out = {'monthly': {}, 'annual': {}, 'annual-hydro': {}}
+        if ts_aggregation == 'monthly':
+            for mon in range(12):
+                print(mon)
+                df_ss = df_[df_.index.month == mon + 1]
+                df_ss_anom = df_ss.T.sub(df_ss.mean(axis=0).T, axis=0).T
+                df_ss_mean = df_ss.mean(axis=0)
+
+                # plt.plot(df_ss['80.00000000000003;39.99999999999999'])
+                # plt.plot(df_ss_anom['80.00000000000003;39.99999999999999'])
+                dict_out['monthly'][mon + 1] = {'mean': df_ss_mean, 'anom': df_ss_anom}
+
+
+        elif ts_aggregation == 'annual':
+            df_ss = df_.groupby([lambda x: x.year]).apply(pd.DataFrame.mean, skipna=False)
+            df_ss_anom = df_ss.T.sub(df_ss.mean(axis=0).T, axis=0).T
+            df_ss_mean = df_ss.mean(axis=0)
+            dict_out['annual'] = {'mean': df_ss_mean, 'anom': df_ss_anom}
+
+        elif ts_aggregation == 'annual-hydro':
+            # shift months first
+            df_.index = df_.index.shift(-9, freq='MS')
+            df_ss = df_.groupby([lambda x: x.year]).apply(pd.DataFrame.mean, skipna=False)
+            df_ss_anom = df_ss.T.sub(df_ss.mean(axis=0).T, axis=0).T
+            df_ss_mean = df_ss.mean(axis=0)
+            dict_out['annual-hydro'] = {'mean': df_ss_mean, 'anom': df_ss_anom}
+
+        else:
+            print('no temporal aggregation provided (possible modes: monthly/annual)')
+            return
+
+        self.anomalies = dict_out
+
+        if plot == True:
+            # how to display?
+
+            # - try back to put it in the shape of the intial grid
+            _shape = self.era5_data.shape
+
+            if ts_aggregation == 'monthly':
+                #
+                # bb.shape
+                for mon in range(12):
+                    print(mon)
+                    aa = np.array(self.anomalies[ts_aggregation][mon + 1]['anom'])
+                    bb = aa.T.reshape((_shape[0], _shape[1], -1))
+                    timei = self.anomalies[ts_aggregation][mon + 1]['anom'].index.year
+
+                    cntyri = 0
+                    for yeari in timei:
+                        fig = plt.figure(figsize=(6, 4))
+                        plt.imshow(bb[:, :, cntyri], vmin=-100, vmax=100, cmap='PRGn')
+                        plt.colorbar()
+                        plt.tight_layout()
+                        fig.savefig(
+                            'figures/' + ts_aggregation + '_' + str(yeari) + '_' + str(mon + 1) + '_anomaly_.jpeg')
+                        cntyri += 1
+                        plt.close('all')
+
+
+
+
+# # --- GPM 3IMERGM.06 --- #
+# melf = met()
+# melf.era5_dir = '/Volumes/DATA/GPM/GPM_3IMERGM.06/'
+# melf.output_dir = '/Users/pohle/PycharmProjects/data-download/marlene/output_GPM-3IMERG_mon/'
+# melf.era5_variable = 'precipitation'
+# melf.mstation_fname = "/Volumes/EX1/data/glacier/marlene/abramov_poly.shp"
+# melf.era5_subset = [69, 73, 38, 41]
+#
+# melf.read_GPM()
+# melf.shapefile_ATTR_FIELD = 'OBJECTID'
+# melf.read_shape()
+# melf.extract_values()
+# melf.save_data()
+# melf.save_grid()
 
 # # --- GPCC --- #
 # melf = met()
@@ -1647,6 +2062,22 @@ melf.save_grid()
 # melf.read_shape()
 # melf.extract_values()
 # melf.save_data()
+
+# --- ERA5 monthly
+melf = met()
+melf.era5_dir = '/Volumes/EX1/data/ECMWF/ERA5/'
+melf.output_dir = '/Users/pohle/PycharmProjects/data-download/marlene/output_ERA5_monthly/'
+melf.era5_variable = 'tp'
+melf.mstation_fname = "/Volumes/EX1/data/tomas/meteo_stations/naryn_both_poly.shp"
+melf.era5_subset = [77.7, 78.6, 41.6, 42.4]
+melf.read_ERA5()
+
+melf.shapefile_ATTR_FIELD = 'ID'
+melf.read_shape()
+melf.extract_values()
+melf.save_data()
+melf.save_grid()
+
 
 
 # --- HAR30 monthly timeseries --- #
